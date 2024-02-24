@@ -90,6 +90,7 @@ func main() {
 	}
 }
 ```
+Full example can be referred here(https://github.com/marcotheo/samplegoapis)
 
 ### Functions
 - justarouter.CreateRouter() = creates your server router
