@@ -63,7 +63,7 @@ func handleRequest(w http.ResponseWriter, r *http.Request, method string, patter
 }
 
 func (params *PathParams) Get(key string) (string, error) {
-	if (len(params.incomingPathReq) - 1) < (*params.pathParams)[key] {
+	if (len(params.incomingPathReq)-1) < (*params.pathParams)[key] || (*params.pathParams)[key] == 0 {
 		return "", errors.New("path param does not exist")
 	}
 
