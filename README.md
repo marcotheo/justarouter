@@ -10,7 +10,7 @@ This router uses `net/http` package. nothing much is different with this router 
 2. Can add subrouters if you want to organize your routes.
 3. Middlewares
    - can add global middlewares
-   - can add sub routerspecific middlewares
+   - can add sub router specific middlewares
    - can add route specific middlewares
 
 example:
