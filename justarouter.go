@@ -1,7 +1,6 @@
 package justarouter
 
 import (
-	"fmt"
 	"net/http"
 	"strings"
 	"time"
@@ -36,8 +35,6 @@ type ServerRouterOptions struct {
 
 func corsMiddleware(next http.Handler, corsOptions CorsOptions) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		fmt.Println(" CORS MIDDLEWARE")
-
 		origin := r.Header.Get("Origin")
 		for _, allowedOrigin := range corsOptions.AllowedOrigins {
 			if origin == allowedOrigin {
