@@ -12,6 +12,7 @@ This router uses `net/http` package. nothing much is different with this router 
    - can add global middlewares
    - can add sub router specific middlewares
    - can add route specific middlewares
+4. Cors configuration
 
 example:
 
@@ -109,7 +110,15 @@ func logMiddleware(next http.Handler) http.Handler {
 }
 
 func main() {
-	router := justarouter.CreateRouter()
+	router := justarouter.CreateRouter(justarouter.ServerRouterOptions{
+		CORS: justarouter.CorsOptions{
+			AllowedOrigins:   []string{"http://localhost:5173"},
+			AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE"},
+			AllowCredentials: true,
+			AllowedHeaders:   []string{"Content-Type", "Authorization"},
+			MaxAge:           3600 * time.Second, // 1 hour
+		},
+	})
 
 	// add global middleware
 	router.Use(logMiddleware)
