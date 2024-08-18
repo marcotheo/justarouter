@@ -1,13 +1,15 @@
 package justarouter
 
 import (
+	"fmt"
 	"net/http"
+	"strings"
+	"time"
 )
-
-type Middleware func(http.Handler) http.Handler
 
 type ServerRouter struct {
 	Mux         *http.ServeMux
+	Handler     *http.Handler
 	Middlewares []Middleware
 }
 
@@ -17,9 +19,61 @@ type SubRouter struct {
 	Middlewares []Middleware
 }
 
-func CreateRouter() ServerRouter {
+type Middleware func(http.Handler) http.Handler
+
+// CorsOptions holds configuration for CORS
+type CorsOptions struct {
+	AllowedOrigins   []string      // List of allowed origins
+	AllowedMethods   []string      // List of allowed HTTP methods
+	AllowCredentials bool          // Whether credentials are allowed
+	AllowedHeaders   []string      // List of allowed headers
+	MaxAge           time.Duration // Optional: Max age of the preflight response
+}
+
+type ServerRouterOptions struct {
+	CORS CorsOptions
+}
+
+func corsMiddleware(next http.Handler, corsOptions CorsOptions) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		fmt.Println(" CORS MIDDLEWARE")
+
+		origin := r.Header.Get("Origin")
+		for _, allowedOrigin := range corsOptions.AllowedOrigins {
+			if origin == allowedOrigin {
+				w.Header().Set("Access-Control-Allow-Origin", origin)
+				break
+			}
+		}
+
+		if len(corsOptions.AllowedHeaders) > 0 {
+			w.Header().Set("Access-Control-Allow-Headers", strings.Join(corsOptions.AllowedHeaders, ", "))
+		}
+
+		if len(corsOptions.AllowedMethods) > 0 {
+			w.Header().Set("Access-Control-Allow-Methods", strings.Join(corsOptions.AllowedMethods, ", "))
+		}
+
+		if corsOptions.AllowCredentials {
+			w.Header().Set("Access-Control-Allow-Credentials", "true")
+		}
+
+		if r.Method == http.MethodOptions {
+			w.WriteHeader(http.StatusOK)
+			return
+		}
+
+		next.ServeHTTP(w, r)
+	})
+}
+
+func CreateRouter(options ServerRouterOptions) ServerRouter {
+	muxInstance := http.NewServeMux()
+	newHandler := corsMiddleware(muxInstance, options.CORS)
+
 	return ServerRouter{
-		Mux:         http.NewServeMux(),
+		Mux:         muxInstance,
+		Handler:     &newHandler,
 		Middlewares: []Middleware{},
 	}
 }
